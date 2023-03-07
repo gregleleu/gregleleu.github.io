@@ -87,10 +87,274 @@
 
     
     
+<p>Raster data in GeoTiff and ArcInfoAsciiGrid formats can be read into
+Spark.</p>
+<div class="section level2">
+<h2 id="using-the-rasterudt">Using the RasterUDT<a class="anchor" aria-label="anchor" href="#using-the-rasterudt"></a>
+</h2>
+<p>Raster data in GeoTiff and ArcInfo Grid format can be loaded directly
+into Spark using the <code><a href="https://rdrr.io/pkg/sparklyr/man/spark_read_binary.html" class="external-link">sparklyr::spark_read_binary</a></code> and Sedona
+constructors <code>RS_FromGeoTiff</code> and
+<code>RS_FromArcInfoAsciiGrid</code>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/apache/sedona/" class="external-link">apache.sedona</a></span><span class="op">)</span></span></code></pre></div>
-<p>TODO</p>
-  </main>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://spark.rstudio.com/" class="external-link">sparklyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/apache/sedona/" class="external-link">apache.sedona</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/sparklyr/man/spark-connections.html" class="external-link">spark_connect</a></span><span class="op">(</span>master <span class="op">=</span> <span class="st">"local"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">data_tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/sparklyr/man/spark_read_binary.html" class="external-link">spark_read_binary</a></span><span class="op">(</span><span class="va">sc</span>, dir <span class="op">=</span> <span class="st">"../../core/src/test/resources/raster/"</span>, name <span class="op">=</span> <span class="st">"data"</span><span class="op">)</span> </span>
+<span></span>
+<span><span class="va">raster</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">data_tbl</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>raster <span class="op">=</span> <span class="fu">RS_FromGeoTiff</span><span class="op">(</span><span class="va">content</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">raster</span> </span>
+<span><span class="co">#&gt; <span style="color: #949494;"># Source: spark&lt;?&gt; [?? x 5]</span></span></span>
+<span><span class="co">#&gt;   path                                        modificationTime    length content</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                       <span style="color: #949494; font-style: italic;">&lt;dttm&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> file:/Users/gregoireleleu/WORK/MISC_CODE/s… 2023-02-14 <span style="color: #949494;">16:51:43</span> <span style="text-decoration: underline;">174</span>803 &lt;raw&gt;  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> file:/Users/gregoireleleu/WORK/MISC_CODE/s… 2023-02-14 <span style="color: #949494;">16:51:43</span> <span style="text-decoration: underline;">174</span>803 &lt;raw&gt;  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> file:/Users/gregoireleleu/WORK/MISC_CODE/s… 2023-02-14 <span style="color: #949494;">16:51:43</span>   <span style="text-decoration: underline;">6</span>619 &lt;raw&gt;  </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with 1 more variable: raster &lt;list&gt;</span></span></span>
+<span></span>
+<span><span class="va">raster</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/sparklyr/man/sdf_schema.html" class="external-link">sdf_schema</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $path</span></span>
+<span><span class="co">#&gt; $path$name</span></span>
+<span><span class="co">#&gt; [1] "path"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $path$type</span></span>
+<span><span class="co">#&gt; [1] "StringType"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $modificationTime</span></span>
+<span><span class="co">#&gt; $modificationTime$name</span></span>
+<span><span class="co">#&gt; [1] "modificationTime"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $modificationTime$type</span></span>
+<span><span class="co">#&gt; [1] "TimestampType"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $length</span></span>
+<span><span class="co">#&gt; $length$name</span></span>
+<span><span class="co">#&gt; [1] "length"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $length$type</span></span>
+<span><span class="co">#&gt; [1] "LongType"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $content</span></span>
+<span><span class="co">#&gt; $content$name</span></span>
+<span><span class="co">#&gt; [1] "content"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $content$type</span></span>
+<span><span class="co">#&gt; [1] "BinaryType"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $raster</span></span>
+<span><span class="co">#&gt; $raster$name</span></span>
+<span><span class="co">#&gt; [1] "raster"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $raster$type</span></span>
+<span><span class="co">#&gt; [1] "RasterUDT"</span></span></code></pre></div>
+<p>Once the data is loaded, raster functions are available in dplyr
+workflows:</p>
+<ul>
+<li><a href="https://sedona.apache.org/latest-snapshot/api/sql/Raster-operators/" class="external-link">Raster
+operators</a></li>
+<li><a href="https://sedona.apache.org/latest-snapshot/api/sql/Raster-loader/" class="external-link">Raster
+input and output</a></li>
+</ul>
+<p>Functions taking in <code>raster: Raster</code> arguments are meant
+to be used with data loaded with this reader, such as
+<code>RS_Value</code>, <code>RS_Values</code>, <code>RS_Envelope</code>.
+Functions taking in <code>Band: Array[Double]</code> arguments work with
+data loaded using the Sedona Geotiff DataFrame loader (see <a href="#Using%20the%20Sedona%20Geotiff%20Dataframe%20Loader">below</a>).</p>
+<p>For example, getting the number of bands:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">raster</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    nbands <span class="op">=</span> <span class="fu">RS_NumBands</span><span class="op">(</span><span class="va">raster</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">path</span>, <span class="va">nbands</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>path <span class="op">=</span> <span class="va">path</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 2</span></span></span>
+<span><span class="co">#&gt;   path       nbands</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> test1.tiff      1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> test2.tiff      1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> test3.tif       4</span></span></code></pre></div>
+<p>Or getting values the envelope:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">raster</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    env <span class="op">=</span> <span class="fu">RS_Envelope</span><span class="op">(</span><span class="va">raster</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">st_astext</span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">path</span>, <span class="va">env</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>path <span class="op">=</span> <span class="va">path</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 2</span></span></span>
+<span><span class="co">#&gt;   path       env                                                                </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                                              </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> test1.tiff POLYGON ((-13095817.809482181 3983868.8560156375, -13095817.809482…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> test2.tiff POLYGON ((-13095817.809482181 3983868.8560156375, -13095817.809482…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> test3.tif  POLYGON ((382240 6152660, 382240 6152980, 382560 6152980, 382560 6…</span></span></code></pre></div>
+<p>Or getting values at specific points:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">raster</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    val <span class="op">=</span> <span class="fu">RS_Value</span><span class="op">(</span><span class="va">raster</span>, <span class="fu">ST_Point</span><span class="op">(</span><span class="op">-</span><span class="fl">13077301.685</span>, <span class="fl">4002565.802</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">path</span>, <span class="va">val</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>path <span class="op">=</span> <span class="va">path</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 2</span></span></span>
+<span><span class="co">#&gt;   path         val</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> test1.tiff   255</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> test2.tiff   255</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> test3.tif     <span style="color: #BB0000;">NA</span></span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="using-the-sedona-geotiff-dataframe-loader">Using the Sedona Geotiff Dataframe Loader<a class="anchor" aria-label="anchor" href="#using-the-sedona-geotiff-dataframe-loader"></a>
+</h2>
+<p>The Sedona Geotiff Dataframe Loader will read data from GeoTiff file
+(or folder containing multiple files) into a Spark DataFrame. The
+resulting data is a nested column. It can be unnested using SQL (results
+are collected)…:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">data_tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spark_read_shapefile.html">spark_read_geotiff</a></span><span class="op">(</span><span class="va">sc</span>, path <span class="op">=</span> <span class="op">(</span><span class="st">"../../core/src/test/resources/raster/"</span><span class="op">)</span>, name <span class="op">=</span> <span class="st">"data"</span>, options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>dropInvalid <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">data_tbl</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># Source: spark&lt;data&gt; [?? x 1]</span></span></span>
+<span><span class="co">#&gt;   image           </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> <span style="color: #949494;">&lt;named list [6]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> <span style="color: #949494;">&lt;named list [6]&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> <span style="color: #949494;">&lt;named list [6]&gt;</span></span></span>
+<span></span>
+<span><span class="co">## Using a direct SQL query: results are collected directly</span></span>
+<span><span class="va">sc</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>    <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbGetQuery.html" class="external-link">dbGetQuery</a></span><span class="op">(</span><span class="st">"SELECT </span></span>
+<span><span class="st">             image.geometry as Geom, </span></span>
+<span><span class="st">             image.height as height, </span></span>
+<span><span class="st">             image.width as width, </span></span>
+<span><span class="st">             image.nBands as bands </span></span>
+<span><span class="st">             FROM data"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                                                                                                              Geom</span></span>
+<span><span class="co">#&gt; 1 POLYGON ((-13095782 4021226.5, -13095782 3983905, -13058822 3983905, -13058822 4021226.5, -13095782 4021226.5))</span></span>
+<span><span class="co">#&gt; 2 POLYGON ((-13095782 4021226.5, -13095782 3983905, -13058822 3983905, -13058822 4021226.5, -13095782 4021226.5))</span></span>
+<span><span class="co">#&gt; 3                      POLYGON ((382245 6152975, 382245 6152665, 382555 6152665, 382555 6152975, 382245 6152975))</span></span>
+<span><span class="co">#&gt;   height width bands</span></span>
+<span><span class="co">#&gt; 1    517   512     1</span></span>
+<span><span class="co">#&gt; 2    517   512     1</span></span>
+<span><span class="co">#&gt; 3     32    32     4</span></span></code></pre></div>
+<p>… or using <code>{sparklyr.nested}</code> (results stay in Spark
+until collection):</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">sparklyr.nested</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">data_tbl</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/sparklyr.nested/man/sdf_schema_json.html" class="external-link">sdf_schema_json</a></span><span class="op">(</span>parse_json <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">jsonlite</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/jsonlite/man/prettify.html" class="external-link">prettify</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; {</span></span>
+<span><span class="co">#&gt;     "type": "struct",</span></span>
+<span><span class="co">#&gt;     "fields": [</span></span>
+<span><span class="co">#&gt;         {</span></span>
+<span><span class="co">#&gt;             "name": "image",</span></span>
+<span><span class="co">#&gt;             "type": {</span></span>
+<span><span class="co">#&gt;                 "type": "struct",</span></span>
+<span><span class="co">#&gt;                 "fields": [</span></span>
+<span><span class="co">#&gt;                     {</span></span>
+<span><span class="co">#&gt;                         "name": "origin",</span></span>
+<span><span class="co">#&gt;                         "type": "string",</span></span>
+<span><span class="co">#&gt;                         "nullable": true,</span></span>
+<span><span class="co">#&gt;                         "metadata": {</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;                         }</span></span>
+<span><span class="co">#&gt;                     },</span></span>
+<span><span class="co">#&gt;                     {</span></span>
+<span><span class="co">#&gt;                         "name": "geometry",</span></span>
+<span><span class="co">#&gt;                         "type": "string",</span></span>
+<span><span class="co">#&gt;                         "nullable": true,</span></span>
+<span><span class="co">#&gt;                         "metadata": {</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;                         }</span></span>
+<span><span class="co">#&gt;                     },</span></span>
+<span><span class="co">#&gt;                     {</span></span>
+<span><span class="co">#&gt;                         "name": "height",</span></span>
+<span><span class="co">#&gt;                         "type": "integer",</span></span>
+<span><span class="co">#&gt;                         "nullable": true,</span></span>
+<span><span class="co">#&gt;                         "metadata": {</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;                         }</span></span>
+<span><span class="co">#&gt;                     },</span></span>
+<span><span class="co">#&gt;                     {</span></span>
+<span><span class="co">#&gt;                         "name": "width",</span></span>
+<span><span class="co">#&gt;                         "type": "integer",</span></span>
+<span><span class="co">#&gt;                         "nullable": true,</span></span>
+<span><span class="co">#&gt;                         "metadata": {</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;                         }</span></span>
+<span><span class="co">#&gt;                     },</span></span>
+<span><span class="co">#&gt;                     {</span></span>
+<span><span class="co">#&gt;                         "name": "nBands",</span></span>
+<span><span class="co">#&gt;                         "type": "integer",</span></span>
+<span><span class="co">#&gt;                         "nullable": true,</span></span>
+<span><span class="co">#&gt;                         "metadata": {</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;                         }</span></span>
+<span><span class="co">#&gt;                     },</span></span>
+<span><span class="co">#&gt;                     {</span></span>
+<span><span class="co">#&gt;                         "name": "data",</span></span>
+<span><span class="co">#&gt;                         "type": {</span></span>
+<span><span class="co">#&gt;                             "type": "array",</span></span>
+<span><span class="co">#&gt;                             "elementType": "double",</span></span>
+<span><span class="co">#&gt;                             "containsNull": true</span></span>
+<span><span class="co">#&gt;                         },</span></span>
+<span><span class="co">#&gt;                         "nullable": true,</span></span>
+<span><span class="co">#&gt;                         "metadata": {</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;                         }</span></span>
+<span><span class="co">#&gt;                     }</span></span>
+<span><span class="co">#&gt;                 ]</span></span>
+<span><span class="co">#&gt;             },</span></span>
+<span><span class="co">#&gt;             "nullable": true,</span></span>
+<span><span class="co">#&gt;             "metadata": {</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;             }</span></span>
+<span><span class="co">#&gt;         }</span></span>
+<span><span class="co">#&gt;     ]</span></span>
+<span><span class="co">#&gt; }</span></span>
+<span><span class="co">#&gt; </span></span>
+<span></span>
+<span><span class="va">data_tbl</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/sparklyr.nested/man/sdf_unnest.html" class="external-link">sdf_unnest</a></span><span class="op">(</span><span class="va">image</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Rows: ??</span></span>
+<span><span class="co">#&gt; Columns: 6</span></span>
+<span><span class="co">#&gt; Database: spark_connection</span></span>
+<span><span class="co">#&gt; $ origin   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "file:///Users/gregoireleleu/WORK/MISC_CODE/sedona/core/src/t…</span></span>
+<span><span class="co">#&gt; $ geometry <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "POLYGON ((-13095782 4021226.5, -13095782 3983905, -13058822 …</span></span>
+<span><span class="co">#&gt; $ height   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 517, 517, 32</span></span>
+<span><span class="co">#&gt; $ width    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 512, 512, 32</span></span>
+<span><span class="co">#&gt; $ nBands   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 4</span></span>
+<span><span class="co">#&gt; $ data     <span style="color: #949494; font-style: italic;">&lt;list&gt;</span> &lt;0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="va">data_tbl</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/sparklyr.nested/man/sdf_unnest.html" class="external-link">sdf_unnest</a></span><span class="op">(</span><span class="va">image</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    mult <span class="op">=</span> <span class="fu">RS_MultiplyFactor</span><span class="op">(</span><span class="va">data</span>, <span class="fl">2L</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">mult</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">res</span><span class="op">$</span><span class="va">data</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="fl">750</span><span class="op">:</span><span class="fl">760</span><span class="op">]</span></span>
+<span><span class="co">#&gt;  [1] 197 197 214 189 181 189 181 214 197 173 239</span></span>
+<span><span class="va">res</span><span class="op">$</span><span class="va">mult</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="fl">750</span><span class="op">:</span><span class="fl">760</span><span class="op">]</span></span>
+<span><span class="co">#&gt;  [1] 394 394 428 378 362 378 362 428 394 346 478</span></span></code></pre></div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 

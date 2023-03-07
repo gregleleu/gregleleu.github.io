@@ -306,9 +306,9 @@ spark.</p>
 <h4 id="loading-directly-in-spark">Loading directly in Spark<a class="anchor" aria-label="anchor" href="#loading-directly-in-spark"></a>
 </h4>
 <p>Loading data in R and then copying it to Spark will most likely not
-be the optimal method to prepare data for the analysis, and loading data
-directly into Spark will often be best. The collection of
-<code>spark_read_*</code> functions is made for this purpose (and extend
+be the optimal method to prepare data for analysis; loading data
+directly into Spark will often be best.<code>spark_read_*</code>
+functions are made for this purpose (and extend
 <code>spark_read_*</code> functions in <code>sparklyr</code>).</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data_tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spark_read_shapefile.html">spark_read_geojson</a></span><span class="op">(</span><span class="va">sc</span>, path <span class="op">=</span> <span class="st">"../../binder/data/testPolygon.json"</span>, name <span class="op">=</span> <span class="st">"data"</span><span class="op">)</span></span>
@@ -318,7 +318,7 @@ directly into Spark will often be best. The collection of
 <span><span class="co">#&gt; Rows: ??</span></span>
 <span><span class="co">#&gt; Columns: 11</span></span>
 <span><span class="co">#&gt; Database: spark_connection</span></span>
-<span><span class="co">#&gt; $ geometry <span style="color: #949494; font-style: italic;">&lt;list&gt;</span> &lt;&lt;environment: 0x11e1ca0f0&gt;&gt;, &lt;&lt;environment: 0x11debb468&gt;&gt;, …</span></span>
+<span><span class="co">#&gt; $ geometry <span style="color: #949494; font-style: italic;">&lt;list&gt;</span> &lt;&lt;environment: 0x1288c4cf8&gt;&gt;, &lt;&lt;environment: 0x12886ecf8&gt;&gt;, …</span></span>
 <span><span class="co">#&gt; $ STATEFP  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "01", "01", "01", "01", "01", "01", "01", "01", "01", "01", "…</span></span>
 <span><span class="co">#&gt; $ COUNTYFP <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "077", "045", "055", "089", "069", "073", "101", "015", "069"…</span></span>
 <span><span class="co">#&gt; $ TRACTCE  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "011501", "021102", "001300", "001700", "041400", "010801", "…</span></span>
@@ -328,7 +328,17 @@ directly into Spark will often be best. The collection of
 <span><span class="co">#&gt; $ NAME     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "5", "4", "3", "2", "1", "4", "3", "1", "2", "3", "2", "4", "…</span></span>
 <span><span class="co">#&gt; $ LSAD     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "BG", "BG", "BG", "BG", "BG", "BG", "BG", "BG", "BG", "BG", "…</span></span>
 <span><span class="co">#&gt; $ ALAND    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "6844991", "11360854", "1378742", "1040641", "8243574", "1303…</span></span>
-<span><span class="co">#&gt; $ AWATER   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "32636", "0", "247387", "0", "0", "9989", "0", "0", "159228",…</span></span></code></pre></div>
+<span><span class="co">#&gt; $ AWATER   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "32636", "0", "247387", "0", "0", "9989", "0", "0", "159228",…</span></span>
+<span></span>
+<span><span class="va">data_tbl</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">geometry</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/sparklyr/man/sdf_schema.html" class="external-link">sdf_schema</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $geometry</span></span>
+<span><span class="co">#&gt; $geometry$name</span></span>
+<span><span class="co">#&gt; [1] "geometry"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $geometry$type</span></span>
+<span><span class="co">#&gt; [1] "GeometryUDT"</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -425,9 +435,9 @@ format before <code>collect</code> is called:</p>
 <div class="section level3">
 <h3 id="writing">Writing<a class="anchor" aria-label="anchor" href="#writing"></a>
 </h3>
-<p>Collected results can be saved directly in R. In many cases it will
-be more efficient to write results directly from Spark. The
-<code>spark_write_*</code> (see <a href="apache.sedona::spark_write_geojson">docs</a>) functions are made
+<p>Collected results can be saved from R. In many cases it will be more
+efficient to write results directly from Spark. The
+<code>spark_write_*</code> (see <a href="?apache.sedona::spark_write_geojson">docs</a>) functions are made
 for this purpose (and extend <code>spark_write_*</code> functions in
 <code>sparklyr</code>).</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
@@ -438,7 +448,7 @@ for this purpose (and extend <code>spark_write_*</code> functions in
 <span></span>
 <span><span class="va">dest_file</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">dir</a></span><span class="op">(</span>recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "_SUCCESS"                                                           </span></span>
-<span><span class="co">#&gt; [2] "part-00000-8eea1db8-d140-41c1-ac76-1aa13f2b49c9-c000.snappy.parquet"</span></span></code></pre></div>
+<span><span class="co">#&gt; [2] "part-00000-589c9d07-373c-4f56-8e1d-c68eb9be4782-c000.snappy.parquet"</span></span></code></pre></div>
 <p>The output can be partitioned by the columns present in the data:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dest_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>  <span class="co">## Destination folder</span></span>
@@ -448,11 +458,11 @@ for this purpose (and extend <code>spark_write_*</code> functions in
 <span></span>
 <span><span class="va">dest_file</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">dir</a></span><span class="op">(</span>recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "_SUCCESS"                                                                        </span></span>
-<span><span class="co">#&gt; [2] "COUNTYFP=001/part-00000-3033294e-0bad-40cf-a7cc-5e56030a3b04.c000.snappy.parquet"</span></span>
-<span><span class="co">#&gt; [3] "COUNTYFP=003/part-00000-3033294e-0bad-40cf-a7cc-5e56030a3b04.c000.snappy.parquet"</span></span>
-<span><span class="co">#&gt; [4] "COUNTYFP=005/part-00000-3033294e-0bad-40cf-a7cc-5e56030a3b04.c000.snappy.parquet"</span></span>
-<span><span class="co">#&gt; [5] "COUNTYFP=007/part-00000-3033294e-0bad-40cf-a7cc-5e56030a3b04.c000.snappy.parquet"</span></span>
-<span><span class="co">#&gt; [6] "COUNTYFP=009/part-00000-3033294e-0bad-40cf-a7cc-5e56030a3b04.c000.snappy.parquet"</span></span></code></pre></div>
+<span><span class="co">#&gt; [2] "COUNTYFP=001/part-00000-fe1d05d3-8a10-4f5c-8be6-807e221902c5.c000.snappy.parquet"</span></span>
+<span><span class="co">#&gt; [3] "COUNTYFP=003/part-00000-fe1d05d3-8a10-4f5c-8be6-807e221902c5.c000.snappy.parquet"</span></span>
+<span><span class="co">#&gt; [4] "COUNTYFP=005/part-00000-fe1d05d3-8a10-4f5c-8be6-807e221902c5.c000.snappy.parquet"</span></span>
+<span><span class="co">#&gt; [5] "COUNTYFP=007/part-00000-fe1d05d3-8a10-4f5c-8be6-807e221902c5.c000.snappy.parquet"</span></span>
+<span><span class="co">#&gt; [6] "COUNTYFP=009/part-00000-fe1d05d3-8a10-4f5c-8be6-807e221902c5.c000.snappy.parquet"</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="spark-dataframes">Spark DataFrames<a class="anchor" aria-label="anchor" href="#spark-dataframes"></a>
@@ -466,11 +476,12 @@ automatically wrap Spark DataFrames in <code>dplyr</code>
 <code class="sourceCode R"><span><span class="va">data_tbl</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "tbl_spark" "tbl_sql"   "tbl_lazy"  "tbl"</span></span></code></pre></div>
 <p>You can get to the underlying Spark DataFrame (SDF) with
-<code><a href="https://rdrr.io/pkg/sparklyr/man/spark_dataframe.html" class="external-link">sparklyr::spark_dataframe</a></code></p>
+<code><a href="https://rdrr.io/pkg/sparklyr/man/spark_dataframe.html" class="external-link">sparklyr::spark_dataframe</a></code>, to be used for example in with
+<code>spakrlyr::invoke</code> to call SDF methods within Spark.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sdf</span> <span class="op">&lt;-</span> <span class="va">data_tbl</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/sparklyr/man/spark_dataframe.html" class="external-link">spark_dataframe</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">sdf</span></span>
-<span><span class="co">#&gt; &lt;jobj[161]&gt;</span></span>
+<span><span class="co">#&gt; &lt;jobj[162]&gt;</span></span>
 <span><span class="co">#&gt;   org.apache.spark.sql.Dataset</span></span>
 <span><span class="co">#&gt;   [geometry: geometry, STATEFP: string ... 9 more fields]</span></span></code></pre></div>
 </div>
@@ -525,7 +536,7 @@ each record is parsed correctly.</p>
 <p>In addition to formats such as CSV and TSV, currently
 <code>apache.sedona</code> also supports reading files in WKT
 (Well-Known Text), WKB (Well-Known Binary), Shapefile and GeoJSON
-formats. See <code>sedona_read_wkt</code> for details.</p>
+formats. See <code><a href="../reference/sedona_read_geojson.html">sedona_read_wkt()</a></code> for details.</p>
 </div>
 <div class="section level3">
 <h3 id="conversion-to-and-from-spatialrdd">Conversion to and from SpatialRDD<a class="anchor" aria-label="anchor" href="#conversion-to-and-from-spatialrdd"></a>
@@ -545,12 +556,12 @@ query above and store it in a <code>SpatialRDD</code> object.</p>
 <span><span class="va">spatial_rdd</span> <span class="op">&lt;-</span> <span class="va">sdf</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="../reference/to_spatial_rdd.html">to_spatial_rdd</a></span><span class="op">(</span>spatial_col <span class="op">=</span> <span class="st">"geom"</span><span class="op">)</span></span>
 <span><span class="va">spatial_rdd</span></span>
 <span><span class="co">#&gt; $.jobj</span></span>
-<span><span class="co">#&gt; &lt;jobj[169]&gt;</span></span>
+<span><span class="co">#&gt; &lt;jobj[170]&gt;</span></span>
 <span><span class="co">#&gt;   org.apache.sedona.core.spatialRDD.SpatialRDD</span></span>
-<span><span class="co">#&gt;   org.apache.sedona.core.spatialRDD.SpatialRDD@13d814f</span></span>
+<span><span class="co">#&gt;   org.apache.sedona.core.spatialRDD.SpatialRDD@21e80d8a</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $.state</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x12d5d5340&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x12fd21bc0&gt;</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "spatial_rdd"</span></span></code></pre></div>
